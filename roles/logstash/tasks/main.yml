@@ -1,0 +1,33 @@
+---
+- name: Downloading and installing public signing key
+  apt_key:
+    url: "{{ gpg_key_logstash }}"
+    state: present
+
+- name: Creating a repo file for Logstash
+  copy:
+    src: logstash.repo
+    dest: /etc/apt/sources.list.d/logstash.list
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Updating repo
+  apt:
+    update_cache: yes
+
+- name: Installing Logstash and its dependencies
+  apt:
+    name:
+      - logstash
+    state: latest
+
+- name: Opening port for Logstash
+  shell: |
+    sudo ufw allow 9600/tcp
+
+- name: Making sure that Logstash is started and enabled
+  service:
+    name: logstash
+    state: restarted
+    enabled: yes

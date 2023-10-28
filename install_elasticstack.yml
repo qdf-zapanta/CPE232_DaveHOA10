@@ -1,0 +1,28 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+    - name: Update and upgrade remote CentOS server
+      dnf:
+        update_cache: yes
+        name:  "*"
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+- hosts: kibana_server
+  tags: kibana
+  become: true
+  roles:
+    - { role: kibana, target_ip: 127.0.0.1, ip_host: 192.168.56.117, gpg_key_kibana: https://artifacts.elastic.co/GPG-KEY-elasticsearch }
+
+- hosts: elasticsearch_server
+  tags: es
+  become: true
+  roles:
+    - { role: elasticsearch, ip_host: 192.168.56.117 }
+
+- hosts: logstash_server
+  tags: logstash
+  become: true
+  roles:
+    - { role: logstash, gpg_key_logstash: https://artifacts.elastic.co/GPG-KEY-elasticsearch }
